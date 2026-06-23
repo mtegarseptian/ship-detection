@@ -5,15 +5,51 @@
 
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div></div>
-    <a href="{{ route('detections.create') }}" class="btn btn-primary rounded-3">
-        <i class="bi bi-plus-circle me-2"></i>Deteksi Baru
-    </a>
+{{-- Bagian Atas: Filter & Tombol Aksi --}}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    
+    {{-- Fitur Filter Khusus Admin --}}
+    <div class="w-100" style="max-width: 400px;">
+        @if(auth()->user()->isAdmin() && isset($operators) && count($operators) > 0)
+        <form action="{{ route('detections.index') }}" method="GET" class="d-flex align-items-center gap-2">
+            <i class="bi bi-funnel text-muted" style="font-size: 1.2rem;"></i>
+            <select name="operator_id" class="form-select border-0 shadow-sm" onchange="this.form.submit()">
+                <option value="">-- Semua Operator --</option>
+                @foreach($operators as $op)
+                    <option value="{{ $op->id }}" {{ request('operator_id') == $op->id ? 'selected' : '' }}>
+                        {{ $op->name }} ({{ $op->detections_count }} Deteksi)
+                    </option>
+                @endforeach
+            </select>
+            @if(request('operator_id'))
+                <a href="{{ route('detections.index') }}" class="btn btn-light text-danger shadow-sm border-0" title="Hapus Filter">
+                    <i class="bi bi-x-circle-fill"></i>
+                </a>
+            @endif
+        </form>
+        @endif
+    </div>
+
+    {{-- Tombol Aksi Kanan --}}
+    <div class="d-flex gap-2">
+        {{-- Tombol Hapus Semua (Hanya aktif jika ada data) --}}
+        @if($detections->total() > 0)
+        <form action="{{ route('detections.clear') }}" method="POST" class="mb-0" onsubmit="return confirm('Peringatan: Yakin ingin menghapus SEMUA riwayat ini beserta gambarnya? Tindakan ini tidak bisa dibatalkan.');">
+            @csrf @method('DELETE')
+            <button type="submit" class="btn btn-outline-danger shadow-sm border-0 bg-white">
+                <i class="bi bi-trash2 me-2"></i>Hapus Semua
+            </button>
+        </form>
+        @endif
+
+        <a href="{{ route('detections.create') }}" class="btn btn-primary rounded-3 shadow-sm">
+            <i class="bi bi-plus-circle me-2"></i>Deteksi Baru
+        </a>
+    </div>
 </div>
 
-<div class="card">
-    <div class="card-header p-3">
+<div class="card border-0 shadow-sm">
+    <div class="card-header p-3 bg-white border-bottom">
         <i class="bi bi-clock-history me-2 text-primary"></i>Semua Deteksi
     </div>
     <div class="card-body p-0">
@@ -28,7 +64,7 @@
                         <th>Kapal</th>
                         <th>Status</th>
                         <th>Waktu</th>
-                        <th class="text-center">Detail</th>
+                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -62,10 +98,22 @@
                         </td>
                         <td style="font-size:.75rem; color:#6c757d;">{{ $d->created_at->format('d M Y H:i') }}</td>
                         <td class="text-center">
-                            <a href="{{ route('detections.show', $d) }}"
-                               class="btn btn-sm btn-outline-primary rounded-2">
-                                <i class="bi bi-eye"></i>
-                            </a>
+                            <div class="d-flex gap-1 justify-content-center">
+                                <a href="{{ route('detections.show', $d) }}"
+                                   class="btn btn-sm btn-outline-primary rounded-2" title="Lihat Detail">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                
+                                @if(auth()->id() === $d->user_id || auth()->user()->isAdmin())
+                                <form action="{{ route('detections.destroy', $d) }}" method="POST" class="mb-0" onsubmit="return confirm('Hapus riwayat deteksi ini beserta gambarnya secara permanen?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-2" title="Hapus Riwayat">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -82,7 +130,7 @@
         </div>
     </div>
     @if($detections->hasPages())
-    <div class="card-footer bg-white">{{ $detections->links() }}</div>
+    <div class="card-footer bg-white border-top-0">{{ $detections->links() }}</div>
     @endif
 </div>
 

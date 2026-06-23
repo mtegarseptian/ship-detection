@@ -6,11 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'ShipDetect AI')</title>
 
-    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -255,6 +252,8 @@
             <i class="bi bi-clock-history"></i> Riwayat Deteksi
         </a>
 
+        {{-- 💡 PERBAIKAN: Seluruh menu Pengelolaan disembunyikan untuk User biasa --}}
+        @can('admin')
         <div class="nav-section-label">Pengelolaan</div>
 
         <a href="{{ route('models.index') }}"
@@ -262,7 +261,6 @@
             <i class="bi bi-cpu"></i> Model AI
         </a>
 
-        @can('admin')
         <a href="{{ route('users.index') }}"
            class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
             <i class="bi bi-people"></i> Pengguna
@@ -330,9 +328,7 @@
     </div>
 </div>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
 <script>

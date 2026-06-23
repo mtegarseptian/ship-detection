@@ -53,9 +53,21 @@
         </div>
         @endif
 
-        <a href="{{ route('detections.index') }}" class="btn btn-light rounded-3 w-100">
-            <i class="bi bi-arrow-left me-2"></i>Kembali ke Riwayat
-        </a>
+        <div class="d-flex flex-column gap-2">
+            <a href="{{ route('detections.index') }}" class="btn btn-light rounded-3 w-100">
+                <i class="bi bi-arrow-left me-2"></i>Kembali ke Riwayat
+            </a>
+            
+            @if(auth()->id() === $detection->user_id || auth()->user()->isAdmin())
+            <form action="{{ route('detections.destroy', $detection) }}" method="POST" class="w-100 mb-0" onsubmit="return confirm('Hapus riwayat deteksi ini secara permanen?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger fw-600 rounded-3 w-100">
+                    <i class="bi bi-trash me-2"></i>Hapus Riwayat
+                </button>
+            </form>
+            @endif
+        </div>
     </div>
 
     {{-- Image Viewer --}}
