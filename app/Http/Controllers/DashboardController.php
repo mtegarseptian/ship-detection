@@ -13,21 +13,24 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $totalDetections = Detection::when(!$user->isAdmin(), fn($q) => $q->where('user_id', $user->id))->count();
-        $doneDetections  = Detection::when(!$user->isAdmin(), fn($q) => $q->where('user_id', $user->id))->where('status', 'done')->count();
-        $totalShips      = Detection::when(!$user->isAdmin(), fn($q) => $q->where('user_id', $user->id))->sum('ship_count');
-        $totalModels     = ModelAI::where('status', 'active')->count();
-        $totalUsers      = $user->isAdmin() ? User::count() : null;
+        // 💡 PERBAIKAN: Tambahkan query() setelah Model
+        $totalDetections = Detection::query()->when(!$user->isAdmin(), fn($q) => $q->where('user_id', $user->id))->count();
+        $doneDetections  = Detection::query()->when(!$user->isAdmin(), fn($q) => $q->where('user_id', $user->id))->where('status', 'done')->count();
+        $totalShips      = Detection::query()->when(!$user->isAdmin(), fn($q) => $q->where('user_id', $user->id))->sum('ship_count');
+        $totalModels     = ModelAI::query()->where('status', 'active')->count();
+        $totalUsers      = $user->isAdmin() ? User::query()->count() : null;
 
         // Data grafik: deteksi per hari 7 hari terakhir
-        $chartData = Detection::selectRaw('DATE(created_at) as date, COUNT(*) as total, SUM(ship_count) as ships')
+        // 💡 PERBAIKAN: Tambahkan query() setelah Model
+        $chartData = Detection::query()->selectRaw('DATE(created_at) as date, COUNT(*) as total, SUM(ship_count) as ships')
             ->when(!$user->isAdmin(), fn($q) => $q->where('user_id', $user->id))
             ->where('created_at', '>=', now()->subDays(7))
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        $recentDetections = Detection::with(['user', 'modelAI'])
+        // 💡 PERBAIKAN: Tambahkan query() setelah Model
+        $recentDetections = Detection::query()->with(['user', 'modelAI'])
             ->when(!$user->isAdmin(), fn($q) => $q->where('user_id', $user->id))
             ->latest()
             ->take(5)
