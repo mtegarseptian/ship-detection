@@ -5,6 +5,7 @@
 
 @push('styles')
 <style>
+    /* --- CSS Lama: Form & Upload Zone --- */
     .card-custom {
         border: 1px solid #e2e8f0;
         border-radius: 0.75rem;
@@ -15,12 +16,8 @@
         border: 1px solid #cbd5e1;
         overflow: hidden;
     }
-    .input-group-custom .form-select, .input-group-custom .btn {
-        border: none;
-    }
-    .input-group-custom .form-select:focus {
-        box-shadow: none;
-    }
+    .input-group-custom .form-select, .input-group-custom .btn { border: none; }
+    .input-group-custom .form-select:focus { box-shadow: none; }
     .input-group-custom:focus-within {
         border-color: #3b82f6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -39,33 +36,51 @@
         background-color: #eff6ff;
     }
     .upload-icon-circle {
-        width: 50px;
-        height: 50px;
-        background: white;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        margin-bottom: 1rem;
+        width: 50px; height: 50px; background: white; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); margin-bottom: 1rem;
     }
     .file-badge {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 2rem;
-        padding: 0.4rem 1rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.85rem;
-        margin-top: 1rem;
+        background: white; border: 1px solid #e2e8f0; border-radius: 2rem;
+        padding: 0.4rem 1rem; display: inline-flex; align-items: center;
+        gap: 0.5rem; font-size: 0.85rem; margin-top: 1rem;
     }
-    .btn-remove-img {
-        transition: transform 0.2s;
+    .btn-remove-img { transition: transform 0.2s; }
+    .btn-remove-img:hover { transform: scale(1.1); }
+
+    /* --- CSS Baru: Modal Detail Model AI --- */
+    .param-scroll-area { max-height: 280px; overflow-y: auto; padding-right: 10px; }
+    .param-scroll-area::-webkit-scrollbar { width: 6px; }
+    .param-scroll-area::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+    .param-scroll-area::-webkit-scrollbar-track { background-color: transparent; }
+    
+    .img-scroll-area { max-height: 350px; overflow-y: auto; overflow-x: hidden; padding-right: 10px; }
+    .img-scroll-area::-webkit-scrollbar { width: 6px; }
+    .img-scroll-area::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+
+    .dropdown-filter-menu {
+        min-width: 280px; max-height: 300px; overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid #e2e8f0;
+        border-radius: 0.5rem; padding: 0.5rem 0;
     }
-    .btn-remove-img:hover {
-        transform: scale(1.1);
+    .dropdown-filter-menu::-webkit-scrollbar { width: 5px; }
+    .dropdown-filter-menu::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 10px; }
+    
+    .dropdown-item-custom {
+        padding: 0.35rem 1.25rem; cursor: pointer; transition: background 0.2s;
+        display: flex; align-items: center; gap: 0.5rem;
     }
+    .dropdown-item-custom:hover { background-color: #f1f5f9; }
+    .form-check-input { cursor: pointer; margin-top: 0; }
+    .form-check-label { cursor: pointer; font-size: 0.85rem; user-select: none; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .param-item { border-bottom: 1px dashed #e2e8f0; padding: 10px 0; display: flex; align-items: start; justify-content: space-between; transition: all 0.2s; }
+    .param-item:last-child { border-bottom: none; }
+    .param-name { font-weight: 600; color: #1e293b; font-size: 0.85rem; font-family: monospace; }
+    .param-val { background: #e0e7ff; color: #4338ca; padding: 2px 10px; border-radius: 6px; font-size: 0.8rem; font-family: monospace; font-weight: bold; max-width: 60%; word-break: break-all; text-align: right;}
+    
+    .img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+    .img-item { transition: all 0.3s ease; }
 </style>
 @endpush
 
@@ -161,7 +176,6 @@
                                     </div>
                                 </div>
                                 
-                                {{-- KEMBALIKAN TEKS INI: Teks "Klik untuk mengganti" --}}
                                 <div class="mt-2 text-primary fw-semibold" style="font-size: 0.85rem;">
                                     <i class="bi bi-arrow-repeat me-1"></i>Klik area ini untuk mengganti gambar
                                 </div>
@@ -184,68 +198,192 @@
     </div>
 </div>
 
-{{-- MODAL DETAIL MODEL --}}
+{{-- ================= ARRAY URUTAN ORIGINAL YAML ================= --}}
+@php
+    $orderedKeys = [
+        'task', 'mode', 'model', 'data', 'epochs', 'time', 'patience', 'batch', 'imgsz',
+        'save', 'save_period', 'cache', 'device', 'workers', 'project', 'name', 'exist_ok',
+        'pretrained', 'optimizer', 'verbose', 'seed', 'deterministic', 'single_cls', 'rect',
+        'cos_lr', 'close_mosaic', 'resume', 'amp', 'fraction', 'profile', 'freeze',
+        'multi_scale', 'compile', 'overlap_mask', 'mask_ratio', 'dropout', 'val', 'split',
+        'save_json', 'conf', 'iou', 'max_det', 'half', 'dnn', 'plots', 'source', 'vid_stride',
+        'stream_buffer', 'visualize', 'augment', 'agnostic_nms', 'classes', 'retina_masks',
+        'embed', 'show', 'save_frames', 'save_txt', 'save_conf', 'save_crop', 'show_labels',
+        'show_conf', 'show_boxes', 'line_width', 'format', 'keras', 'optimize', 'int8',
+        'dynamic', 'simplify', 'opset', 'workspace', 'nms', 'lr0', 'lrf', 'momentum',
+        'weight_decay', 'warmup_epochs', 'warmup_momentum', 'warmup_bias_lr', 'box', 'cls',
+        'dfl', 'pose', 'kobj', 'rle', 'angle', 'nbs', 'hsv_h', 'hsv_s', 'hsv_v', 'degrees',
+        'translate', 'scale', 'shear', 'perspective', 'flipud', 'fliplr', 'bgr', 'mosaic',
+        'mixup', 'cutmix', 'copy_paste', 'copy_paste_mode', 'auto_augment', 'erasing',
+        'cfg', 'tracker', 'save_dir'
+    ];
+@endphp
+
+{{-- ================= MODAL LOOPING DETAIL MODEL ================= --}}
 @foreach($activeModels as $model)
+
+@php
+    $rawYamlData = is_array($model->args_yaml) ? $model->args_yaml : [];
+    $yamlData = [];
+    
+    // Urutkan data sesuai array original
+    foreach($orderedKeys as $key) {
+        if(array_key_exists($key, $rawYamlData)) {
+            $yamlData[$key] = $rawYamlData[$key];
+            unset($rawYamlData[$key]);
+        }
+    }
+    // Sisa data
+    foreach($rawYamlData as $key => $val) {
+        $yamlData[$key] = $val;
+    }
+
+    $grafik = is_array($model->metrics_images) ? $model->metrics_images : [];
+    $batch  = is_array($model->batch_images) ? $model->batch_images : [];
+    $allImages = array_merge($grafik, $batch);
+@endphp
+
 <div class="modal fade" id="modalDetail-{{ $model->id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 rounded-4 shadow">
-            <div class="modal-header bg-light border-bottom-0 p-3">
-                <h6 class="modal-title fw-bold mb-0">
-                    <i class="bi bi-cpu text-primary me-2"></i>Detail Model: {{ $model->name }} 
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            
+            <div class="modal-header bg-light border-bottom p-3">
+                <h5 class="modal-title fw-bold mb-0">
+                    <i class="bi bi-cpu text-primary me-2"></i>{{ $model->name }}
                     <span class="badge bg-secondary ms-1">{{ $model->version }}</span>
-                </h6>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            
             <div class="modal-body p-4 bg-white">
                 
-                <div class="row g-3 mb-4">
+                {{-- Bagian Atas: 2 Kolom --}}
+                <div class="row g-4 mb-4">
+                    
+                    {{-- KOLOM KIRI: KONFIGURASI ARGS.YAML --}}
                     <div class="col-md-6">
-                        <div class="p-3 border rounded-3 h-100 bg-light">
-                            <h6 class="fw-bold mb-2 text-primary" style="font-size:.9rem;"><i class="bi bi-gear-fill me-1"></i> Konfigurasi</h6>
-                            <hr class="mt-1 mb-2">
-                            <table class="table table-sm table-borderless mb-0" style="font-size: .85rem;">
-                                <tr><td class="text-muted px-0">Base Model</td><td class="fw-semibold text-end px-0">{{ $model->base_model ?? 'N/A' }}</td></tr>
-                                <tr><td class="text-muted px-0">Epochs</td><td class="fw-semibold text-end px-0">{{ $model->epochs ?? 'N/A' }}</td></tr>
-                                <tr><td class="text-muted px-0">Batch Size</td><td class="fw-semibold text-end px-0">{{ $model->batch_size ?? 'N/A' }}</td></tr>
-                                <tr><td class="text-muted px-0">Image Size</td><td class="fw-semibold text-end px-0">{{ $model->imgsz ?? 'N/A' }} px</td></tr>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 border rounded-3 h-100 bg-light">
-                            <h6 class="fw-bold mb-2 text-success" style="font-size:.9rem;"><i class="bi bi-check-circle-fill me-1"></i> Akurasi</h6>
-                            <hr class="mt-1 mb-2">
-                            <table class="table table-sm table-borderless mb-0" style="font-size: .85rem;">
-                                <tr><td class="text-muted px-0">mAP50</td><td class="fw-bold text-success text-end px-0">{{ $model->map50 ? round($model->map50 * 100, 2) . '%' : 'N/A' }}</td></tr>
-                                <tr><td class="text-muted px-0">mAP50-95</td><td class="fw-semibold text-end px-0">{{ $model->map50_95 ? round($model->map50_95 * 100, 2) . '%' : 'N/A' }}</td></tr>
-                                <tr><td class="text-muted px-0">Precision</td><td class="fw-semibold text-end px-0">{{ $model->precision ? round($model->precision * 100, 2) . '%' : 'N/A' }}</td></tr>
-                                <tr><td class="text-muted px-0">Recall</td><td class="fw-semibold text-end px-0">{{ $model->recall ? round($model->recall * 100, 2) . '%' : 'N/A' }}</td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <h6 class="fw-bold mb-2" style="font-size:.9rem;"><i class="bi bi-images me-1"></i> Grafik Evaluasi</h6>
-                <div class="row g-2">
-                    @if(!empty($model->metrics_images) && is_array($model->metrics_images))
-                        @foreach($model->metrics_images as $namaGrafik => $path)
-                        <div class="col-6 col-sm-4">
-                            <div class="border rounded-2 p-1 text-center bg-light">
-                                <a href="{{ asset('storage/' . $path) }}" target="_blank">
-                                    <img src="{{ asset('storage/' . $path) }}" class="img-fluid rounded" alt="{{ $namaGrafik }}" style="max-height: 120px; object-fit: contain;">
-                                </a>
-                                <div class="mt-1 text-muted text-truncate" style="font-size:.7rem;" title="{{ $namaGrafik }}">{{ $namaGrafik }}</div>
+                        <div class="card bg-light border-0 h-100">
+                            <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-2">
+                                <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-file-earmark-code me-2"></i>Konfigurasi (args.yaml)</h6>
+                                
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                                        <i class="bi bi-funnel-fill me-1"></i> Filter
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end dropdown-filter-menu shadow">
+                                        @foreach($yamlData as $key => $val)
+                                            @php $safeKey = Str::slug($key); @endphp
+                                            <li class="dropdown-item-custom">
+                                                <input class="form-check-input filter-checkbox" type="checkbox" id="cb-yaml-det-{{$model->id}}-{{$safeKey}}" data-target=".item-yaml-det-{{$model->id}}-{{$safeKey}}" checked>
+                                                <label class="form-check-label" for="cb-yaml-det-{{$model->id}}-{{$safeKey}}" title="{{ $key }}">{{ $key }}</label>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body param-scroll-area">
+                                @forelse($yamlData as $key => $val)
+                                    @php 
+                                        $safeKey = Str::slug($key);
+                                        $valStr = is_array($val) ? json_encode($val) : (is_bool($val) ? ($val ? 'true' : 'false') : (string)$val); 
+                                    @endphp
+                                    <div class="param-item item-yaml-det-{{$model->id}}-{{$safeKey}}">
+                                        <span class="param-name">{{ $key }}</span>
+                                        <span class="param-val">{{ $valStr === '' ? 'null' : $valStr }}</span>
+                                    </div>
+                                @empty
+                                    <div class="text-center text-muted py-3"><i class="bi bi-info-circle me-1"></i> Data args.yaml tidak tersedia.</div>
+                                @endforelse
                             </div>
                         </div>
-                        @endforeach
-                    @else
-                        <div class="col-12 text-center py-3 bg-light rounded-2 border">
-                            <span class="text-muted" style="font-size:.85rem;">Tidak ada grafik evaluasi.</span>
+                    </div>
+
+                    {{-- KOLOM KANAN: AKURASI AKHIR (CSV) --}}
+                    <div class="col-md-6">
+                        <div class="card bg-light border-0 h-100">
+                            <div class="card-header bg-light border-bottom py-3">
+                                <h6 class="fw-bold mb-0 text-success"><i class="bi bi-check-circle-fill me-2"></i>Akurasi Akhir (results.csv)</h6>
+                            </div>
+                            <div class="card-body d-flex flex-column justify-content-center px-4">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <div class="p-3 border rounded text-center bg-white shadow-sm d-flex flex-column justify-content-center h-100 py-4">
+                                            <div class="text-muted fw-bold mb-2" style="font-size: 0.85rem;">mAP50</div>
+                                            <div class="fw-bold text-success" style="font-size: 1.5rem;">{{ $model->map50 ? round($model->map50 * 100, 2) . '%' : 'N/A' }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 border rounded text-center bg-white shadow-sm d-flex flex-column justify-content-center h-100 py-4">
+                                            <div class="text-muted fw-bold mb-2" style="font-size: 0.85rem;">mAP50-95</div>
+                                            <div class="fw-bold text-dark" style="font-size: 1.5rem;">{{ $model->map50_95 ? round($model->map50_95 * 100, 2) . '%' : 'N/A' }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 border rounded text-center bg-white shadow-sm d-flex flex-column justify-content-center h-100 py-4">
+                                            <div class="text-muted fw-bold mb-2" style="font-size: 0.85rem;">Precision</div>
+                                            <div class="fw-bold text-dark" style="font-size: 1.5rem;">{{ $model->precision ? round($model->precision * 100, 2) . '%' : 'N/A' }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 border rounded text-center bg-white shadow-sm d-flex flex-column justify-content-center h-100 py-4">
+                                            <div class="text-muted fw-bold mb-2" style="font-size: 0.85rem;">Recall</div>
+                                            <div class="fw-bold text-dark" style="font-size: 1.5rem;">{{ $model->recall ? round($model->recall * 100, 2) . '%' : 'N/A' }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    @endif
+                    </div>
+
+                </div>
+
+                {{-- BAGIAN BAWAH: GALERI VISUAL DENGAN FILTER --}}
+                <div class="card border-0 bg-light">
+                    <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-2">
+                        <h6 class="fw-bold mb-0 text-danger"><i class="bi bi-images me-2"></i>Galeri Visual (Grafik & Batch)</h6>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-semibold dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                                <i class="bi bi-funnel-fill me-1"></i> Filter
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-filter-menu shadow">
+                                @foreach($allImages as $filename => $path)
+                                    @php $safeImg = Str::slug($filename); @endphp
+                                    <li class="dropdown-item-custom">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="cb-img-det-{{$model->id}}-{{$safeImg}}" data-target=".item-img-det-{{$model->id}}-{{$safeImg}}" checked>
+                                        <label class="form-check-label" for="cb-img-det-{{$model->id}}-{{$safeImg}}" title="{{$filename}}">{{ $filename }}</label>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body img-scroll-area">
+                        <div class="img-grid">
+                            @forelse($allImages as $filename => $path)
+                                @php $safeImg = Str::slug($filename); @endphp
+                                <div class="img-item item-img-det-{{$model->id}}-{{$safeImg}}">
+                                    <div class="border rounded p-2 text-center bg-white shadow-sm h-100 d-flex flex-column">
+                                        <a href="{{ asset('storage/' . $path) }}" target="_blank" class="flex-grow-1 d-flex align-items-center justify-content-center">
+                                            <img src="{{ asset('storage/' . $path) }}" class="img-fluid rounded" style="max-height: 140px; object-fit: contain;">
+                                        </a>
+                                        <div class="mt-2 text-dark text-truncate fw-bold border-top pt-1" style="font-size: 0.75rem;" title="{{ $filename }}">{{ $filename }}</div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="col-12 text-center text-muted py-3">Tidak ada gambar yang tersimpan.</div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
 
             </div>
+            
+            <div class="modal-footer bg-light border-top-0">
+                <button type="button" class="btn btn-secondary px-4 fw-semibold rounded-pill" data-bs-dismiss="modal">Tutup</button>
+            </div>
+            
         </div>
     </div>
 </div>
@@ -255,32 +393,26 @@
 
 @push('scripts')
 <script>
-// --- Script Preview Gambar Interaktif & Ringkas ---
+// --- Script Preview Gambar Interaktif ---
 const satInput  = document.getElementById('satImage');
 const dropZone  = document.getElementById('imageDropZone');
 const preview   = document.getElementById('imagePreview');
 
-// Kontainer State
 const stateEmpty = document.getElementById('stateEmpty');
 const statePreview = document.getElementById('statePreview');
-
-// Teks Info File
 const fileName = document.getElementById('fileName');
 const fileSize = document.getElementById('fileSize');
 
 function showPreview(file) {
     const reader = new FileReader();
     reader.onload = e => {
-        // Set Data Gambar
         preview.src = e.target.result;
         fileName.textContent = file.name;
         fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
         
-        // Sembunyikan state kosong, tampilkan preview
         stateEmpty.classList.add('d-none');
         statePreview.classList.remove('d-none');
         
-        // Ubah padding & style kotak agar lebih fit
         dropZone.style.padding = '1rem';
         dropZone.style.borderStyle = 'solid';
         dropZone.style.borderColor = '#3b82f6';
@@ -289,19 +421,12 @@ function showPreview(file) {
     reader.readAsDataURL(file);
 }
 
-// FUNGSI BARU: Untuk menghapus gambar yang sudah dipilih
 function removeImage(event) {
-    // Mencegah klik menembus ke dropzone (yang akan membuka file dialog lagi)
     event.stopPropagation();
-    
-    // Kosongkan file input
     satInput.value = '';
-    
-    // Kembalikan ke tampilan awal (kosong)
     statePreview.classList.add('d-none');
     stateEmpty.classList.remove('d-none');
     
-    // Kembalikan style dropzone ke default
     dropZone.style.padding = '1.5rem';
     dropZone.style.borderStyle = 'dashed';
     dropZone.style.borderColor = '#cbd5e1';
@@ -312,10 +437,8 @@ satInput.addEventListener('change', () => {
     if (satInput.files[0]) showPreview(satInput.files[0]); 
 });
 
-// Efek Drag & Drop
 ['dragover','dragenter'].forEach(e => dropZone.addEventListener(e, ev => { 
-    ev.preventDefault(); 
-    dropZone.classList.add('dragover'); 
+    ev.preventDefault(); dropZone.classList.add('dragover'); 
 }));
 
 ['dragleave','drop'].forEach(e => dropZone.addEventListener(e, () => {
@@ -325,10 +448,7 @@ satInput.addEventListener('change', () => {
 dropZone.addEventListener('drop', ev => {
     ev.preventDefault();
     const f = ev.dataTransfer.files[0];
-    if (f) { 
-        satInput.files = ev.dataTransfer.files; 
-        showPreview(f); 
-    }
+    if (f) { satInput.files = ev.dataTransfer.files; showPreview(f); }
 });
 
 // --- Script Tombol Detail Model ---
@@ -344,5 +464,22 @@ if(modelSelect) {
         }
     });
 }
+
+// --- Script Filter Modal Detail ---
+const filterCheckboxes = document.querySelectorAll('.filter-checkbox');
+filterCheckboxes.forEach(cb => {
+    cb.addEventListener('change', function() {
+        const targetSelector = this.getAttribute('data-target');
+        const targetElements = document.querySelectorAll(targetSelector);
+        
+        targetElements.forEach(el => {
+            if (this.checked) {
+                el.style.display = ''; 
+            } else {
+                el.style.display = 'none'; 
+            }
+        });
+    });
+});
 </script>
 @endpush

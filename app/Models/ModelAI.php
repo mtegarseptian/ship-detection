@@ -18,11 +18,14 @@ class ModelAI extends Model
         'status',
         'uploaded_by',
         
-        // Data dari args.yaml
+        // Data dari args.yaml (Utama)
         'base_model',
         'epochs',
         'batch_size',
         'imgsz',
+        
+        // Seluruh data args.yaml utuh
+        'args_yaml',
         
         // Data dari results.csv
         'precision',
@@ -30,13 +33,16 @@ class ModelAI extends Model
         'map50',
         'map50_95',
         
-        // Data gambar grafik
-        'metrics_images'
+        // Data gambar
+        'metrics_images',
+        'batch_images'
     ];
 
-    // Beritahu Laravel bahwa metrics_images berbentuk Array (JSON)
+    // Beritahu Laravel bahwa field ini berbentuk Array (JSON di DB)
     protected $casts = [
         'metrics_images' => 'array',
+        'batch_images'   => 'array',
+        'args_yaml'      => 'array',
     ];
 
     public function uploader()
