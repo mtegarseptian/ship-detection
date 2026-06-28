@@ -161,7 +161,6 @@
                             {{-- State: Preview (Gambar sudah dipilih) --}}
                             <div id="statePreview" class="d-none">
                                 <div class="position-relative d-inline-block">
-                                    {{-- Tombol X untuk Batal --}}
                                     <button type="button" class="btn btn-danger position-absolute rounded-circle shadow btn-remove-img" onclick="removeImage(event)" style="top: -12px; right: -12px; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 10;" title="Batal / Hapus Gambar">
                                         <i class="bi bi-x fs-5"></i>
                                     </button>
@@ -179,16 +178,43 @@
                                 <div class="mt-2 text-primary fw-semibold" style="font-size: 0.85rem;">
                                     <i class="bi bi-arrow-repeat me-1"></i>Klik area ini untuk mengganti gambar
                                 </div>
-                                
                             </div>
                         </div>
                         <input type="file" id="satImage" name="satellite_image" accept="image/jpeg,image/png,image/tiff,.tiff,.tif" class="d-none" required {{ $activeModels->isEmpty() ? 'disabled' : '' }}>
                     </div>
 
+                    {{-- 3. Parameter Deteksi / Confidence Threshold Slider (FITUR BARU TAHAP 2) --}}
+                    <div class="mb-5 p-3 rounded-3 bg-light border shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label for="confThreshold" class="form-label fw-bold mb-0 text-dark" style="font-size:.9rem;">
+                                3. Parameter Deteksi <span class="text-danger">*</span>
+                            </label>
+                            <span class="badge bg-primary fs-6 px-3 py-2 shadow-sm" id="confValueDisplay">0.85</span>
+                        </div>
+                        
+                        {{-- Label Nama Parameter --}}
+                        <div class="fw-semibold text-secondary mb-1" style="font-size: 0.85rem;">Confidence Threshold</div>
+                        
+                        {{-- Teks Penjelasan Tambahan --}}
+                        <p class="text-muted mb-3" style="font-size: 0.8rem; line-height: 1.4;">
+                            Semakin tinggi nilai confidence, model hanya akan menampilkan objek dengan tingkat keyakinan yang lebih tinggi (menghindari salah deteksi awan/ombak).
+                        </p>
+                        
+                        <div class="px-2">
+                            <input type="range" class="form-range" id="confThreshold" name="confidence_threshold" min="0.05" max="0.95" step="0.05" value="0.85" {{ $activeModels->isEmpty() ? 'disabled' : '' }}>
+                            
+                            <div class="d-flex justify-content-between text-muted mt-1 fw-bold" style="font-size: 0.75rem;">
+                                <span class="text-warning">0.05 (Sangat Sensitif)</span>
+                                <span class="text-success">0.50 (Seimbang)</span>
+                                <span class="text-primary">0.95 (Sangat Ketat)</span>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Action Buttons --}}
-                    <div class="d-flex gap-2 justify-content-end pt-2">
-                        <a href="{{ route('detections.index') }}" class="btn btn-light px-4 rounded-3 fw-medium">Batal</a>
-                        <button type="submit" class="btn btn-primary px-4 rounded-3 fw-medium" {{ $activeModels->isEmpty() ? 'disabled' : '' }}>
+                    <div class="d-flex gap-2 justify-content-end pt-3 border-top">
+                        <a href="{{ route('detections.index') }}" class="btn btn-light px-4 rounded-3 fw-medium border">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3 fw-medium shadow-sm" {{ $activeModels->isEmpty() ? 'disabled' : '' }}>
                             <i class="bi bi-radar me-1"></i> Mulai Deteksi
                         </button>
                     </div>
@@ -427,7 +453,7 @@ function removeImage(event) {
     statePreview.classList.add('d-none');
     stateEmpty.classList.remove('d-none');
     
-    dropZone.style.padding = '1.5rem';
+    dropZone.style.padding = '6rem 2rem';
     dropZone.style.borderStyle = 'dashed';
     dropZone.style.borderColor = '#cbd5e1';
     dropZone.style.backgroundColor = '#f8fafc';
@@ -481,5 +507,24 @@ filterCheckboxes.forEach(cb => {
         });
     });
 });
+
+// --- Script Interaktif Slider Confidence Threshold (FITUR TAHAP 2) ---
+const confSlider = document.getElementById('confThreshold');
+const confDisplay = document.getElementById('confValueDisplay');
+
+if (confSlider && confDisplay) {
+    confSlider.addEventListener('input', function() {
+        const currentVal = parseFloat(this.value).toFixed(2);
+        confDisplay.textContent = currentVal;
+        
+        if (currentVal >= 0.80) {
+            confDisplay.className = 'badge bg-primary fs-6 px-3 py-2 shadow-sm';
+        } else if (currentVal >= 0.40) {
+            confDisplay.className = 'badge bg-success fs-6 px-3 py-2 shadow-sm';
+        } else {
+            confDisplay.className = 'badge bg-warning text-dark fs-6 px-3 py-2 shadow-sm';
+        }
+    });
+}
 </script>
 @endpush

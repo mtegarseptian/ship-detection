@@ -9,10 +9,12 @@ class Detection extends Model
     protected $fillable = [
         'image_original', 'image_result', 'model_ai_id',
         'user_id', 'ship_count', 'bounding_boxes', 'status',
+        'confidence_threshold', 
     ];
 
     protected $casts = [
-        'bounding_boxes' => 'array',
+        'bounding_boxes'       => 'array',
+        'confidence_threshold' => 'float', // Desimal, misal 0.25, 0.5, 0.75
     ];
 
     public function user()
